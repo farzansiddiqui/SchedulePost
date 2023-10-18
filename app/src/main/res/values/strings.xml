@@ -1,0 +1,9 @@
+<resources>
+    <string name="app_name">SchedulePost</string>
+    <string name="enter_caption">enter caption</string>
+    <string name="add_to_your_post">Add Image</string>
+    <string name="post">POST</string>
+    <string name="add_image">Add Image</string>
+    <string name="hint_image">Hint Image</string>
+    <string name="clear_image">clear image</string>
+</resources>
