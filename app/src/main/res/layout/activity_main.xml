@@ -47,9 +47,12 @@
 
             <GridView
                 android:id="@+id/gridView"
-                android:layout_width="match_parent"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:numColumns="3"
+                android:listSelector="@android:color/transparent"
+                android:stretchMode="columnWidth"
+                android:clickable="false"
                 android:verticalSpacing="@dimen/_8dp"
                 android:horizontalSpacing="@dimen/_8dp"/>
 
