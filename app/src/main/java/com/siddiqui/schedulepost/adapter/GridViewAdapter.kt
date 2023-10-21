@@ -59,6 +59,8 @@ class GridViewAdapter(
         }else {
             setImageView?.setImageURI(null)
             clearButton?.visibility = View.GONE
+            addImageView?.visibility = View.VISIBLE
+            addPostTextView?.visibility = View.VISIBLE
 
         }
        /* addImageView?.setOnClickListener {

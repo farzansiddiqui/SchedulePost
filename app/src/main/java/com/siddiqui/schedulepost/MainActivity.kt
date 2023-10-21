@@ -13,31 +13,45 @@ class MainActivity : AppCompatActivity() {
 
     private val imageUris = mutableListOf<Uri?>(null)
     private lateinit var adapter: GridViewAdapter
+    private var nextDefaultItemPosition = 0 // Track the position for the next default item
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        val picker = PhotoPicker(this) { uri ->
-            if (uri != null) {
-                // binding.postImageView.setImageURI(uri)
-            } else {
-                Toast.makeText(this, "No Image Select", Toast.LENGTH_SHORT).show()
-            }
-        }
+
         adapter = GridViewAdapter(this, imageUris)
         binding.gridView.adapter = adapter
 
         val photoPicker = PhotoPicker(this) { uri ->
+            // Set the selected image URI at the next default item position
             imageUris[imageUris.indexOf(null)] = uri
-            Log.d("TAG", "Image select")
             adapter.notifyDataSetChanged()
+
+            if (imageUris.contains(uri)){
+                nextDefaultItemPosition++
+                    imageUris.add(nextDefaultItemPosition, null)
+                    adapter.notifyDataSetChanged()
+
+            }
+
+            // Increment the position for the next default item
+
+
+            // Add a new default item in the list for the next image
+         /*   if (nextDefaultItemPosition < imageUris.size){
+                imageUris.add(nextDefaultItemPosition, null)
+                Log.d("TAG", "position : $nextDefaultItemPosition")
+                adapter.notifyDataSetChanged()
+
+            }*/
         }
 
         binding.gridView.setOnItemClickListener { _, _, position, _ ->
             if (imageUris[position] == null) {
                 photoPicker.pickMedia()
+
             }
         }
 
