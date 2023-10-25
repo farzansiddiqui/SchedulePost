@@ -43,12 +43,16 @@ class GridViewAdapter(
             view = layoutInflater?.inflate(R.layout.add_image_grid, parent, false)
         }
 
-
         val setImageView = view?.findViewById<ImageView>(R.id.set_imageView)
         val addImageView = view?.findViewById<ImageView>(R.id.add_imageView)
         val clearButton = view?.findViewById<ImageView>(R.id.clear_imageView)
         val addPostTextView = view?.findViewById<TextView>(R.id.textView)
         val uri = getItem(position)
+
+        clearButton?.setOnClickListener {
+           imageUrs.removeAt(position)
+            notifyDataSetChanged()
+        }
 
         if (uri != null){
             setImageView?.setImageURI(uri)
@@ -61,7 +65,6 @@ class GridViewAdapter(
             clearButton?.visibility = View.GONE
             addImageView?.visibility = View.VISIBLE
             addPostTextView?.visibility = View.VISIBLE
-
         }
 
         return view!!
