@@ -63,11 +63,6 @@ class GridViewAdapter(
             addPostTextView?.visibility = View.VISIBLE
 
         }
-       /* addImageView?.setOnClickListener {
-           imageUris.add(position, null)
-            notifyDataSetChanged()
-        }*/
-
 
         return view!!
     }

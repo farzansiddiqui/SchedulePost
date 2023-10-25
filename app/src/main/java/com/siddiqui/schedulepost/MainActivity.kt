@@ -26,32 +26,17 @@ class MainActivity : AppCompatActivity() {
 
         val photoPicker = PhotoPicker(this) { uri ->
             // Set the selected image URI at the next default item position
-            imageUris[imageUris.indexOf(null)] = uri
+            if (uri != null && uri != Uri.EMPTY) {
+                imageUris.add(nextDefaultItemPosition, uri)
+                nextDefaultItemPosition++
+            }
             adapter.notifyDataSetChanged()
 
-            if (imageUris.contains(uri)){
-                nextDefaultItemPosition++
-                    imageUris.add(nextDefaultItemPosition, null)
-                    adapter.notifyDataSetChanged()
-
-            }
-
-            // Increment the position for the next default item
-
-
-            // Add a new default item in the list for the next image
-         /*   if (nextDefaultItemPosition < imageUris.size){
-                imageUris.add(nextDefaultItemPosition, null)
-                Log.d("TAG", "position : $nextDefaultItemPosition")
-                adapter.notifyDataSetChanged()
-
-            }*/
         }
 
         binding.gridView.setOnItemClickListener { _, _, position, _ ->
             if (imageUris[position] == null) {
                 photoPicker.pickMedia()
-
             }
         }
 
