@@ -3,8 +3,7 @@ package com.siddiqui.schedulepost
 import android.net.Uri
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
-import android.util.Log
-import android.widget.Toast
+import androidx.core.view.size
 import com.siddiqui.schedulepost.adapter.GridViewAdapter
 import com.siddiqui.schedulepost.databinding.ActivityMainBinding
 
@@ -13,7 +12,7 @@ class MainActivity : AppCompatActivity() {
 
     private val imageUris = mutableListOf<Uri?>(null)
     private lateinit var adapter: GridViewAdapter
-    private var nextDefaultItemPosition = 0 // Track the position for the next default item
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -24,13 +23,15 @@ class MainActivity : AppCompatActivity() {
         adapter = GridViewAdapter(this, imageUris)
         binding.gridView.adapter = adapter
 
+
+
         val photoPicker = PhotoPicker(this) { uri ->
             // Set the selected image URI at the next default item position
             if (uri != null && uri != Uri.EMPTY) {
-                imageUris.add(nextDefaultItemPosition, uri)
+              imageUris.add(nextDefaultItemPosition, uri)
                 nextDefaultItemPosition++
+                adapter.notifyDataSetChanged()
             }
-            adapter.notifyDataSetChanged()
 
         }
 
@@ -38,9 +39,21 @@ class MainActivity : AppCompatActivity() {
             if (imageUris[position] == null) {
                 photoPicker.pickMedia()
             }
+
         }
 
 
+    }
+
+    override fun onResume() {
+        super.onResume()
+        binding.postBtn.isEnabled = binding.gridView.size > 0 && binding.enterEditTextCaptions.text.toString().isNotEmpty()
+
+    }
+
+    companion object {
+        const val TAG = "TAG"
+        var nextDefaultItemPosition = 0
     }
 
 

@@ -8,10 +8,8 @@ import android.view.ViewGroup
 import android.widget.BaseAdapter
 import android.widget.ImageView
 import android.widget.TextView
-import androidx.lifecycle.LiveData
+import com.siddiqui.schedulepost.MainActivity.Companion.nextDefaultItemPosition
 import com.siddiqui.schedulepost.R
-import com.siddiqui.schedulepost.model.GridImageView
-import com.siddiqui.schedulepost.viewmodel.GridViewModel
 
 class GridViewAdapter(
     private val context: Context,
@@ -50,8 +48,11 @@ class GridViewAdapter(
         val uri = getItem(position)
 
         clearButton?.setOnClickListener {
-           imageUrs.removeAt(position)
-            notifyDataSetChanged()
+            if (imageUrs[position] != null){
+                imageUrs.removeAt(position)
+                 nextDefaultItemPosition--
+                notifyDataSetChanged()
+            }
         }
 
         if (uri != null){
