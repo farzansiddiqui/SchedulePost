@@ -8,7 +8,7 @@ import android.view.ViewGroup
 import android.widget.BaseAdapter
 import android.widget.ImageView
 import android.widget.TextView
-import com.siddiqui.schedulepost.MainActivity.Companion.nextDefaultItemPosition
+import com.siddiqui.schedulepost.view.MainActivity.Companion.nextDefaultItemPosition
 import com.siddiqui.schedulepost.R
 
 class GridViewAdapter(

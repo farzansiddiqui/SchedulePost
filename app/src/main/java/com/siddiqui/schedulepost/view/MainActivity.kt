@@ -1,9 +1,10 @@
-package com.siddiqui.schedulepost
+package com.siddiqui.schedulepost.view
 
 import android.net.Uri
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
-import androidx.core.view.size
+import android.util.Log
+import com.siddiqui.schedulepost.PhotoPicker
 import com.siddiqui.schedulepost.adapter.GridViewAdapter
 import com.siddiqui.schedulepost.databinding.ActivityMainBinding
 
@@ -30,6 +31,7 @@ class MainActivity : AppCompatActivity() {
             if (uri != null && uri != Uri.EMPTY) {
               imageUris.add(nextDefaultItemPosition, uri)
                 nextDefaultItemPosition++
+                Log.d(TAG, "position:$nextDefaultItemPosition")
                 adapter.notifyDataSetChanged()
             }
 
@@ -47,7 +49,8 @@ class MainActivity : AppCompatActivity() {
 
     override fun onResume() {
         super.onResume()
-        binding.postBtn.isEnabled = binding.gridView.size > 0 && binding.enterEditTextCaptions.text.toString().isNotEmpty()
+        val isButtonEnabled = imageUris.any { it!=null } &&  binding.enterEditTextCaptions.text.toString().isNotEmpty()
+        binding.postBtn.isEnabled = isButtonEnabled
 
     }
 
