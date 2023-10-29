@@ -20,16 +20,18 @@ class MainActivity : AppCompatActivity() {
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
+        binding.materialToolbar.setNavigationOnClickListener {
+            finish()
+        }
 
         adapter = GridViewAdapter(this, imageUris)
         binding.gridView.adapter = adapter
 
 
-
         val photoPicker = PhotoPicker(this) { uri ->
             // Set the selected image URI at the next default item position
             if (uri != null && uri != Uri.EMPTY) {
-              imageUris.add(nextDefaultItemPosition, uri)
+                imageUris.add(nextDefaultItemPosition, uri)
                 nextDefaultItemPosition++
                 Log.d(TAG, "position:$nextDefaultItemPosition")
                 adapter.notifyDataSetChanged()
@@ -43,14 +45,11 @@ class MainActivity : AppCompatActivity() {
             }
 
         }
-
-
     }
 
     override fun onResume() {
         super.onResume()
-        val isButtonEnabled = imageUris.any { it!=null } &&  binding.enterEditTextCaptions.text.toString().isNotEmpty()
-        binding.postBtn.isEnabled = isButtonEnabled
+
 
     }
 

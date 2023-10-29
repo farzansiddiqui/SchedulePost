@@ -6,6 +6,25 @@
     android:layout_height="match_parent"
     tools:context=".view.MainActivity">
 
+    <com.google.android.material.appbar.AppBarLayout
+        android:id="@+id/appBarLayout"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent">
+        
+        <com.google.android.material.appbar.MaterialToolbar
+            android:id="@+id/materialToolbar"
+            android:layout_width="match_parent"
+            android:layout_height="?attr/actionBarSize"
+            app:title="Create Post"
+            app:menu="@menu/top_app_bar"
+            app:navigationIcon="@drawable/baseline_arrow_back_24"
+            app:titleCentered="true"/>
+
+    </com.google.android.material.appbar.AppBarLayout>
+
     <androidx.core.widget.NestedScrollView
         android:id="@+id/nestedScrollView"
         android:layout_width="0dp"
@@ -56,24 +75,8 @@
                 android:horizontalSpacing="@dimen/_8dp"/>
 
 
-            <com.google.android.material.button.MaterialButton
-                android:id="@+id/post_btn"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="@dimen/_16dp"
-                android:enabled="false"
-                android:layout_gravity="center"
-                android:fontFamily="sans-serif-medium"
-                android:padding="0dp"
-                android:text="@string/post"/>
-
         </LinearLayout>
 
-
     </androidx.core.widget.NestedScrollView>
-
-
-
-
 
 </androidx.constraintlayout.widget.ConstraintLayout>

@@ -8,6 +8,9 @@
     <string name="clear_image">clear image</string>
     <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>
-    <string name="post_schedule">POST Schedule</string>
-    <string name="scheduled_post">Scheduled Post</string>
+    <string name="post_schedule"> Facebook Post</string>
+    <string name="scheduled_post">History Post</string>
+    <string name="add_post_statement">Ready to take control of your social media presence? Start by adding your social accounts and unlock the convenience
+    Scheduled Facebook Posts.</string>
+    <string name="add_post">Add Post</string>
 </resources>
