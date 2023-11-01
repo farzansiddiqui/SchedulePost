@@ -9,6 +9,7 @@ object RetrofitInstance {
         Retrofit.Builder().baseUrl("https://graph.facebook.com/v18.0/").
         addConverterFactory(GsonConverterFactory.create()).build()
     }
+
     val apiInterface by lazy {
         retrofit.create(RetrofitApi::class.java)
     }
