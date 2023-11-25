@@ -64,7 +64,7 @@ class MainActivity : AppCompatActivity() {
             }
             true
         }
-       postData()
+       //postData()
 
     }
 

@@ -10,7 +10,7 @@ object RetrofitInstance {
         addConverterFactory(GsonConverterFactory.create()).build()
     }
 
-    val apiInterface by lazy {
+    val apiInterface:RetrofitApi by lazy {
         retrofit.create(RetrofitApi::class.java)
     }
 
