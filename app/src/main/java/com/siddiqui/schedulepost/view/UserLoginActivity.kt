@@ -27,7 +27,7 @@ class UserLoginActivity : AppCompatActivity() {
         }
     }
 
-   private fun openFragment(signUpFragment: Fragment){
+   private fun openFragment(signUpFragment: Fragment) {
         val fragmentManager = supportFragmentManager
         val transaction  = fragmentManager.beginTransaction()
        transaction.replace(R.id.fragment_ContainerView, signUpFragment).commit()

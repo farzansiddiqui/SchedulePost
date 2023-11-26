@@ -1,63 +1,89 @@
 package com.siddiqui.schedulepost.view.fragments
 
+import android.content.Context
+import android.content.Intent
 import android.os.Bundle
+import android.util.Log
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import com.siddiqui.schedulepost.R
+import android.widget.Toast
+import com.google.firebase.Firebase
+import com.google.firebase.database.DataSnapshot
+import com.google.firebase.database.DatabaseError
+import com.google.firebase.database.DatabaseReference
+import com.google.firebase.database.ValueEventListener
+import com.google.firebase.database.database
 import com.siddiqui.schedulepost.databinding.FragmentSignBinding
+import com.siddiqui.schedulepost.model.UserRegistration
+import com.siddiqui.schedulepost.view.ListPostActivity
 
-// TODO: Rename parameter arguments, choose names that match
-// the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
-private const val ARG_PARAM1 = "param1"
-private const val ARG_PARAM2 = "param2"
-private lateinit var binding: FragmentSignBinding
 
-/**
- * A simple [Fragment] subclass.
- * Use the [SignFragment.newInstance] factory method to
- * create an instance of this fragment.
- */
 class SignFragment : Fragment() {
-    // TODO: Rename and change types of parameters
-    private var param1: String? = null
-    private var param2: String? = null
+    private lateinit var binding: FragmentSignBinding
+    private lateinit var fragmentContext: Context
+    private lateinit var database: DatabaseReference
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        arguments?.let {
-            param1 = it.getString(ARG_PARAM1)
-            param2 = it.getString(ARG_PARAM2)
-        }
+        database = Firebase.database.reference
+
     }
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): View? {
+    ): View {
         // Inflate the layout for this fragment
         binding = FragmentSignBinding.inflate(inflater,container, false)
         return binding.root
     }
 
-    companion object {
-        /**
-         * Use this factory method to create a new instance of
-         * this fragment using the provided parameters.
-         *
-         * @param param1 Parameter 1.
-         * @param param2 Parameter 2.
-         * @return A new instance of fragment SignFragment.
-         */
-        // TODO: Rename and change types and number of parameters
-        @JvmStatic
-        fun newInstance(param1: String, param2: String) =
-            SignFragment().apply {
-                arguments = Bundle().apply {
-                    putString(ARG_PARAM1, param1)
-                    putString(ARG_PARAM2, param2)
-                }
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+        binding.signInBtn.setOnClickListener {
+            if (binding.edittextEmail.text.toString().isEmpty() && binding.editTextPassword.text.toString().isEmpty()){
+                Toast.makeText(fragmentContext, "Please enter the details", Toast.LENGTH_SHORT).show()
+            }else {
+                userLogin(binding.edittextEmail.text.toString(), binding.editTextPassword.text.toString())
             }
+        }
     }
+
+    override fun onAttach(context: Context) {
+        super.onAttach(context)
+        fragmentContext = context
+    }
+
+    private fun userLogin(email:String, pass:String) {
+          val emailQuery = database.child("users").orderByChild("emailOrMobile").equalTo(email)
+            emailQuery.addListenerForSingleValueEvent(object : ValueEventListener{
+                override fun onDataChange(snapshot: DataSnapshot) {
+                    var emailAndPasswordExist = false
+                    for (dataSnapShotChild in snapshot.children){
+                        val userRegistration = dataSnapShotChild.getValue(UserRegistration::class.java)
+                        // Check if the password matches for any user with the specified email
+                        if (userRegistration?.password.equals(pass)) {
+                            emailAndPasswordExist = true
+                            break
+                        }
+
+                    }
+                    if (emailAndPasswordExist){
+                        startActivity(Intent(context, ListPostActivity::class.java))
+
+                    }else {
+                        Toast.makeText(fragmentContext, "Data doesn't exists.", Toast.LENGTH_SHORT).show()
+                    }
+                }
+
+                override fun onCancelled(error: DatabaseError) {
+                    Log.d("TAG", "failed: ${error.message}")
+                }
+            })
+        }
+
+
 }

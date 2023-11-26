@@ -15,4 +15,6 @@
     <string name="add_post">Add Post</string>
     <string name="facebook_app_id">334978012382048</string>
     <string name="facebook_client_token">b40f2226ede3304971fd6977613c862c</string>
+    <string name="enter_email_or_mobile_number">enter email or mobile number</string>
+    <string name="enter_password">enter password</string>
 </resources>
