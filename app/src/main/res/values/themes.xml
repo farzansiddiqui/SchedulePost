@@ -5,5 +5,7 @@
         <!-- <item name="colorPrimary">@color/my_light_primary</item> -->
     </style>
 
-    <style name="Theme.SchedulePost" parent="Base.Theme.SchedulePost" />
+    <style name="Theme.SchedulePost" parent="Base.Theme.SchedulePost">
+        <item name="android:navigationBarColor">@android:color/transparent</item>
+    </style>
 </resources>

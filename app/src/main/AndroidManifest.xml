@@ -16,24 +16,31 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.SchedulePost"
         tools:targetApi="31">
+
         <activity
             android:name=".view.RoutingActivity"
-            android:exported="false" />
-        <activity
-            android:name=".view.UserLoginActivity"
-            android:exported="true">
+            android:exported="true"
+            android:theme="@style/Theme.SplashScreen.">
+
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
+
         </activity>
+
+        <activity
+            android:name=".view.UserLoginActivity"
+            android:exported="true"/>
+
         <activity
             android:name=".view.ListPostActivity"
-            android:exported="true"></activity>
+            android:exported="true"/>
+
         <activity
             android:name=".view.MainActivity"
-            android:exported="true"></activity>
+            android:exported="true"/>
 
         <meta-data
             android:name="preloaded_fonts"
