@@ -10,6 +10,7 @@ import androidx.core.view.ViewCompat
 import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.updateLayoutParams
+import com.google.android.material.elevation.SurfaceColors
 import com.google.android.material.tabs.TabLayoutMediator
 import com.siddiqui.schedulepost.R
 import com.siddiqui.schedulepost.adapter.ViewPagerAdapter
@@ -19,23 +20,23 @@ class ListPostActivity : AppCompatActivity() {
     private lateinit var binding: ActivityListPostBinding
     override fun onCreate(savedInstanceState: Bundle?) {
         enableEdgeToEdge()
-
         super.onCreate(savedInstanceState)
 
         binding = ActivityListPostBinding.inflate(layoutInflater)
         setContentView(binding.root)
+        window.navigationBarColor = SurfaceColors.getColorForElevation(this,0f)
+
 
         ViewCompat.setOnApplyWindowInsetsListener(binding.root) { view, windowInsets ->
             val insets = windowInsets.getInsets(WindowInsetsCompat.Type.systemBars())
             view.updateLayoutParams<MarginLayoutParams> {
                 // Push all content below the top system status bar
                 topMargin = insets.top
+                bottomMargin = insets.bottom
 
             }
             WindowInsetsCompat.CONSUMED
         }
-
-
 
 
         binding.viewPager.adapter = ViewPagerAdapter(supportFragmentManager, lifecycle)

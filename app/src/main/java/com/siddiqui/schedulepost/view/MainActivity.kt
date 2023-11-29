@@ -4,12 +4,17 @@ import android.net.Uri
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.util.Log
+import android.view.ViewGroup
 import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
-import com.facebook.AccessToken
+import androidx.core.view.ViewCompat
+import androidx.core.view.WindowInsetsCompat
+import androidx.core.view.updateLayoutParams
 import com.facebook.FacebookSdk
-import com.facebook.GraphRequest
 import com.facebook.appevents.AppEventsLogger
+import com.google.android.material.elevation.SurfaceColors
+import com.google.firebase.storage.FirebaseStorage
+import com.google.firebase.storage.StorageReference
 import com.siddiqui.schedulepost.PhotoPicker
 import com.siddiqui.schedulepost.R
 import com.siddiqui.schedulepost.adapter.GridViewAdapter
@@ -18,20 +23,37 @@ import com.siddiqui.schedulepost.retrofit.RetrofitInstance
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import org.json.JSONObject
 
 class MainActivity : AppCompatActivity() {
     private lateinit var binding: ActivityMainBinding
 
     private val imageUris = mutableListOf<Uri?>(null)
     private lateinit var adapter: GridViewAdapter
+    private val storage = FirebaseStorage.getInstance()
+    private val storageRef = storage.reference
+    private val fileName = "image_${System.currentTimeMillis()}.jpg"
+    private lateinit var imageUri: Uri
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
-       // enableEdgeToEdge()
+       enableEdgeToEdge()
         super.onCreate(savedInstanceState)
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
+
+        window.navigationBarColor = SurfaceColors.getColorForElevation(this,0f)
+
+
+        ViewCompat.setOnApplyWindowInsetsListener(binding.root) { view, windowInsets ->
+            val insets = windowInsets.getInsets(WindowInsetsCompat.Type.systemBars())
+            view.updateLayoutParams<ViewGroup.MarginLayoutParams> {
+                // Push all content below the top system status bar
+                topMargin = insets.top
+                bottomMargin = insets.bottom
+
+            }
+            WindowInsetsCompat.CONSUMED
+        }
 
         FacebookSdk.sdkInitialize(applicationContext)
         AppEventsLogger.activateApp(application)
@@ -48,8 +70,8 @@ class MainActivity : AppCompatActivity() {
             // Set the selected image URI at the next default item position
             if (uri != null && uri != Uri.EMPTY) {
                 imageUris.add(nextDefaultItemPosition, uri)
+                    imageUri = uri
                 nextDefaultItemPosition++
-                Log.d(TAG, "position:$nextDefaultItemPosition")
                 adapter.notifyDataSetChanged()
             }
         }
@@ -62,7 +84,18 @@ class MainActivity : AppCompatActivity() {
         }
         binding.materialToolbar.setOnMenuItemClickListener {
             if (it.itemId == R.id.post_item){
-                Toast.makeText(this, "click post", Toast.LENGTH_SHORT).show()
+                if (binding.enterEditTextCaptions.text.toString().isNotEmpty() && nextDefaultItemPosition > 0){
+                    if (imageUri != Uri.EMPTY){
+                        CoroutineScope(Dispatchers.Main).launch {
+                            uploadImage(imageUri)
+                        }
+                        Toast.makeText(this, "Upload Image", Toast.LENGTH_SHORT).show()
+                    }
+
+                }else {
+                    Toast.makeText(this, "Please fill the both details", Toast.LENGTH_SHORT).show()
+                }
+              
             }
             true
         }
@@ -72,8 +105,6 @@ class MainActivity : AppCompatActivity() {
 
     override fun onResume() {
         super.onResume()
-
-
     }
 
     companion object {
@@ -81,7 +112,10 @@ class MainActivity : AppCompatActivity() {
         var nextDefaultItemPosition = 0
     }
 
-
+    private fun uploadImage(uri: Uri){
+        val imageRef = storageRef.child("images/$fileName")
+        imageRef.putFile(uri)
+    }
 
     private fun postData(){
         val pageId= "114801539913429"

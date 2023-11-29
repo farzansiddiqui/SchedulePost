@@ -6,6 +6,5 @@
     </style>
 
     <style name="Theme.SchedulePost" parent="Base.Theme.SchedulePost">
-        <item name="android:navigationBarColor">@android:color/transparent</item>
     </style>
 </resources>
