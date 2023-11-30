@@ -14,7 +14,6 @@ import com.facebook.FacebookSdk
 import com.facebook.appevents.AppEventsLogger
 import com.google.android.material.elevation.SurfaceColors
 import com.google.firebase.storage.FirebaseStorage
-import com.google.firebase.storage.StorageReference
 import com.siddiqui.schedulepost.PhotoPicker
 import com.siddiqui.schedulepost.R
 import com.siddiqui.schedulepost.adapter.GridViewAdapter
@@ -31,8 +30,8 @@ class MainActivity : AppCompatActivity() {
     private lateinit var adapter: GridViewAdapter
     private val storage = FirebaseStorage.getInstance()
     private val storageRef = storage.reference
-    private val fileName = "image_${System.currentTimeMillis()}.jpg"
-    private lateinit var imageUri: Uri
+  //  private val fileName = "image_${System.currentTimeMillis()}.jpg"
+    private lateinit var imageUri: List<Uri>
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -70,7 +69,7 @@ class MainActivity : AppCompatActivity() {
             // Set the selected image URI at the next default item position
             if (uri != null && uri != Uri.EMPTY) {
                 imageUris.add(nextDefaultItemPosition, uri)
-                    imageUri = uri
+                imageUri = listOf(uri)
                 nextDefaultItemPosition++
                 adapter.notifyDataSetChanged()
             }
@@ -82,10 +81,16 @@ class MainActivity : AppCompatActivity() {
             }
 
         }
+       //postData()
+
+    }
+
+    override fun onResume() {
+        super.onResume()
         binding.materialToolbar.setOnMenuItemClickListener {
             if (it.itemId == R.id.post_item){
                 if (binding.enterEditTextCaptions.text.toString().isNotEmpty() && nextDefaultItemPosition > 0){
-                    if (imageUri != Uri.EMPTY){
+                    if (imageUri != Uri.EMPTY) {
                         CoroutineScope(Dispatchers.Main).launch {
                             uploadImage(imageUri)
                         }
@@ -95,16 +100,11 @@ class MainActivity : AppCompatActivity() {
                 }else {
                     Toast.makeText(this, "Please fill the both details", Toast.LENGTH_SHORT).show()
                 }
-              
+
             }
             true
         }
-       //postData()
 
-    }
-
-    override fun onResume() {
-        super.onResume()
     }
 
     companion object {
@@ -112,9 +112,27 @@ class MainActivity : AppCompatActivity() {
         var nextDefaultItemPosition = 0
     }
 
-    private fun uploadImage(uri: Uri){
-        val imageRef = storageRef.child("images/$fileName")
-        imageRef.putFile(uri)
+    private fun uploadImage(imageUriList:List<Uri>){
+
+        imageUriList.forEachIndexed{ index, uri ->
+            val fileName = "image_$index${System.currentTimeMillis()}.jpg"
+
+            val imageRef = storageRef.child("images/$fileName").putFile(uri)
+
+            imageRef.addOnSuccessListener {
+                Log.d(TAG, "Image successful upload on firebase: ")
+            }.addOnCanceledListener {
+                Log.d(TAG, "Retry: ")
+            }
+        }
+
+
+
+    }
+
+    override fun onStop() {
+        super.onStop()
+        nextDefaultItemPosition = 0;
     }
 
     private fun postData(){
