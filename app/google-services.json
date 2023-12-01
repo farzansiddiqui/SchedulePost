@@ -1,0 +1,30 @@
+{
+  "project_info": {
+    "project_number": "406889318213",
+    "firebase_url": "https://schedulepost-a1ffe-default-rtdb.firebaseio.com",
+    "project_id": "schedulepost-a1ffe",
+    "storage_bucket": "schedulepost-a1ffe.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:406889318213:android:8fb93eb773349bf53ee02c",
+        "android_client_info": {
+          "package_name": "com.siddiqui.schedulepost"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCEHFuJj1NhRah_fvnjwBJt1zY2ZtJu6AM"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

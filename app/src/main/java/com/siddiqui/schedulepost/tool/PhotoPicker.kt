@@ -1,4 +1,4 @@
-package com.siddiqui.schedulepost
+package com.siddiqui.schedulepost.tool
 import android.net.Uri
 import android.widget.Toast
 import androidx.activity.result.PickVisualMediaRequest

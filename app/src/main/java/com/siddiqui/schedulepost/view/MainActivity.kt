@@ -14,11 +14,12 @@ import com.facebook.FacebookSdk
 import com.facebook.appevents.AppEventsLogger
 import com.google.android.material.elevation.SurfaceColors
 import com.google.firebase.storage.FirebaseStorage
-import com.siddiqui.schedulepost.PhotoPicker
+import com.siddiqui.schedulepost.tool.PhotoPicker
 import com.siddiqui.schedulepost.R
 import com.siddiqui.schedulepost.adapter.GridViewAdapter
 import com.siddiqui.schedulepost.databinding.ActivityMainBinding
 import com.siddiqui.schedulepost.retrofit.RetrofitInstance
+import com.siddiqui.schedulepost.tool.ImageCompressor
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -30,17 +31,17 @@ class MainActivity : AppCompatActivity() {
     private lateinit var adapter: GridViewAdapter
     private val storage = FirebaseStorage.getInstance()
     private val storageRef = storage.reference
-  //  private val fileName = "image_${System.currentTimeMillis()}.jpg"
-    private lateinit var imageUri: List<Uri>
+
+    private var imageUriList = mutableListOf<Uri?>()
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
-       enableEdgeToEdge()
+        enableEdgeToEdge()
         super.onCreate(savedInstanceState)
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        window.navigationBarColor = SurfaceColors.getColorForElevation(this,0f)
+        window.navigationBarColor = SurfaceColors.getColorForElevation(this, 0f)
 
 
         ViewCompat.setOnApplyWindowInsetsListener(binding.root) { view, windowInsets ->
@@ -69,7 +70,7 @@ class MainActivity : AppCompatActivity() {
             // Set the selected image URI at the next default item position
             if (uri != null && uri != Uri.EMPTY) {
                 imageUris.add(nextDefaultItemPosition, uri)
-                imageUri = listOf(uri)
+                imageUriList.add(uri)
                 nextDefaultItemPosition++
                 adapter.notifyDataSetChanged()
             }
@@ -81,23 +82,26 @@ class MainActivity : AppCompatActivity() {
             }
 
         }
-       //postData()
+        //postData()
 
     }
 
     override fun onResume() {
         super.onResume()
         binding.materialToolbar.setOnMenuItemClickListener {
-            if (it.itemId == R.id.post_item){
-                if (binding.enterEditTextCaptions.text.toString().isNotEmpty() && nextDefaultItemPosition > 0){
-                    if (imageUri != Uri.EMPTY) {
+            if (it.itemId == R.id.post_item) {
+                if (binding.enterEditTextCaptions.text.toString()
+                        .isNotEmpty() && nextDefaultItemPosition > 0
+                ) {
+                    if (imageUriList != Uri.EMPTY) {
                         CoroutineScope(Dispatchers.Main).launch {
-                            uploadImage(imageUri)
+                            uploadImage(imageUriList)
+
                         }
-                        Toast.makeText(this, "Upload Image", Toast.LENGTH_SHORT).show()
+                        Toast.makeText(this, "Upload Image Successful!!", Toast.LENGTH_SHORT).show()
                     }
 
-                }else {
+                } else {
                     Toast.makeText(this, "Please fill the both details", Toast.LENGTH_SHORT).show()
                 }
 
@@ -112,22 +116,20 @@ class MainActivity : AppCompatActivity() {
         var nextDefaultItemPosition = 0
     }
 
-    private fun uploadImage(imageUriList:List<Uri>){
-
-        imageUriList.forEachIndexed{ index, uri ->
-            val fileName = "image_$index${System.currentTimeMillis()}.jpg"
-
-            val imageRef = storageRef.child("images/$fileName").putFile(uri)
-
+    private  fun uploadImage(imageUri: MutableList<Uri?>) {
+        val compressQuality = 80
+        val compressor = ImageCompressor()
+        for (imageList in imageUri) {
+            val compressFile = compressor.compressImage(contentResolver,imageList!!,compressQuality)
+            val file = Uri.fromFile(compressFile)
+            val imageRef = storageRef.child("images/"+System.currentTimeMillis()).putFile(file)
             imageRef.addOnSuccessListener {
                 Log.d(TAG, "Image successful upload on firebase: ")
             }.addOnCanceledListener {
-                Log.d(TAG, "Retry: ")
+                Log.d(TAG, "Image failed to upload try again!!.")
             }
+
         }
-
-
-
     }
 
     override fun onStop() {
@@ -135,23 +137,29 @@ class MainActivity : AppCompatActivity() {
         nextDefaultItemPosition = 0;
     }
 
-    private fun postData(){
-        val pageId= "114801539913429"
+    private fun postData() {
+        val pageId = "114801539913429"
         val message = "Testing the api to published on fb page"
-        val accessToken = "EAAEwqSVvg2ABO5DvBazlP0njfd0aZCKWvI36M13aCHPvuUrBzPXMYNwXUi4e513eljD3DkuEVyWKIrLfGbimDJRLqD4szJZAEbtaj3nPa6myasBZBqe29RaW7uzckWUCOfg0AXREFnVZBvzoofV6YYM0Yu22uMIlToZCm0vgGahFZBqOqMZAap7fXTYmZCURERcLGBM0KPG0WWyJIqIZD"
+        val accessToken =
+            "EAAEwqSVvg2ABO5DvBazlP0njfd0aZCKWvI36M13aCHPvuUrBzPXMYNwXUi4e513eljD3DkuEVyWKIrLfGbimDJRLqD4szJZAEbtaj3nPa6myasBZBqe29RaW7uzckWUCOfg0AXREFnVZBvzoofV6YYM0Yu22uMIlToZCm0vgGahFZBqOqMZAap7fXTYmZCURERcLGBM0KPG0WWyJIqIZD"
         CoroutineScope(Dispatchers.Main).launch {
-            val response = RetrofitInstance.apiInterface.publishedPost(pageId,message,"Bearer $accessToken")
-            if (response.isSuccessful){
-                    val responseJson = response.body()
-                    if (responseJson != null) {
-                        val pagId = responseJson.id
-                        Log.d(TAG, "postData: $pagId")
-                        Toast.makeText(this@MainActivity, "Message Post successful on facebook", Toast.LENGTH_SHORT).show()
-                    }else{
-                        Log.d(TAG, "Response body is null or does not contain the ID.")
+            val response =
+                RetrofitInstance.apiInterface.publishedPost(pageId, message, "Bearer $accessToken")
+            if (response.isSuccessful) {
+                val responseJson = response.body()
+                if (responseJson != null) {
+                    val pagId = responseJson.id
+                    Log.d(TAG, "postData: $pagId")
+                    Toast.makeText(
+                        this@MainActivity,
+                        "Message Post successful on facebook",
+                        Toast.LENGTH_SHORT
+                    ).show()
+                } else {
+                    Log.d(TAG, "Response body is null or does not contain the ID.")
 
-                    }
-                }else {
+                }
+            } else {
                 val errorResponse = response.errorBody()?.string()
                 Log.d(TAG, "Error: $errorResponse")
             }
