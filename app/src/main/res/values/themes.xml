@@ -7,4 +7,9 @@
 
     <style name="Theme.SchedulePost" parent="Base.Theme.SchedulePost">
     </style>
+
+    <style name="TransparentAlertDialog" parent="Theme.AppCompat.Light.Dialog.Alert">
+        <item name="android:windowBackground">@android:color/transparent</item>
+    </style>
+
 </resources>

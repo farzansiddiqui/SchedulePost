@@ -1,5 +1,6 @@
 package com.siddiqui.schedulepost.tool
 import android.net.Uri
+import android.view.View
 import android.widget.Toast
 import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
@@ -16,6 +17,7 @@ class PhotoPicker(
                 onMediaPicked(uri)
             } else {
                 onMediaPicked(null)
+
                 Toast.makeText(activity, "No Image Select", Toast.LENGTH_SHORT).show()
             }
 
@@ -26,6 +28,8 @@ class PhotoPicker(
         pickMedia.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly))
 
     }
+
+
 }
 
 

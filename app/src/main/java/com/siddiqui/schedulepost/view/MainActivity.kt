@@ -5,8 +5,10 @@ import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.util.Log
 import android.view.ViewGroup
+import android.widget.ImageView
 import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
+import androidx.appcompat.app.AlertDialog
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.updateLayoutParams
@@ -14,6 +16,7 @@ import com.facebook.FacebookSdk
 import com.facebook.appevents.AppEventsLogger
 import com.google.android.material.elevation.SurfaceColors
 import com.google.firebase.storage.FirebaseStorage
+import com.google.firebase.storage.StorageMetadata
 import com.siddiqui.schedulepost.tool.PhotoPicker
 import com.siddiqui.schedulepost.R
 import com.siddiqui.schedulepost.adapter.GridViewAdapter
@@ -77,8 +80,11 @@ class MainActivity : AppCompatActivity() {
         }
 
         binding.gridView.setOnItemClickListener { _, _, position, _ ->
+                binding.enterEditTextCaptions.clearFocus()
             if (imageUris[position] == null) {
                 photoPicker.pickMedia()
+            }else {
+                imageUris[position]?.let { openImageView( it) }
             }
 
         }
@@ -118,13 +124,15 @@ class MainActivity : AppCompatActivity() {
 
     private  fun uploadImage(imageUri: MutableList<Uri?>) {
         val compressQuality = 80
+        val userId = "farzan";
+        val metadata = StorageMetadata.Builder().setCustomMetadata("user_id",userId).build()
         val compressor = ImageCompressor()
         for (imageList in imageUri) {
             val compressFile = compressor.compressImage(contentResolver,imageList!!,compressQuality)
             val file = Uri.fromFile(compressFile)
-            val imageRef = storageRef.child("images/"+System.currentTimeMillis()).putFile(file)
+            val imageRef = storageRef.child("images/"+System.currentTimeMillis()).putFile(file,metadata)
             imageRef.addOnSuccessListener {
-                Log.d(TAG, "Image successful upload on firebase: ")
+                Log.d(TAG, "Image successful upload on firebase:")
             }.addOnCanceledListener {
                 Log.d(TAG, "Image failed to upload try again!!.")
             }
@@ -165,4 +173,17 @@ class MainActivity : AppCompatActivity() {
             }
         }
     }
+
+    private fun openImageView(uri: Uri){
+        val alertDialog = AlertDialog.Builder(this,R.style.TransparentAlertDialog)
+        val layoutInflater = layoutInflater
+        val view = layoutInflater.inflate(R.layout.image_dialog,null)
+        val imageView:ImageView = view.findViewById(R.id.imageView_dialog)
+        imageView.setImageURI(uri)
+        alertDialog.setView(view)
+        alertDialog.show()
+
+    }
+
+
 }
