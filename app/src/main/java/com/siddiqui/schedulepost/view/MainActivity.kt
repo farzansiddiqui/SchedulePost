@@ -1,5 +1,6 @@
 package com.siddiqui.schedulepost.view
 
+import android.content.Context
 import android.net.Uri
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
@@ -125,12 +126,12 @@ class MainActivity : AppCompatActivity() {
     private  fun uploadImage(imageUri: MutableList<Uri?>) {
         val compressQuality = 80
         val userId = "farzan";
-        val metadata = StorageMetadata.Builder().setCustomMetadata("user_id",userId).build()
+
         val compressor = ImageCompressor()
         for (imageList in imageUri) {
             val compressFile = compressor.compressImage(contentResolver,imageList!!,compressQuality)
             val file = Uri.fromFile(compressFile)
-            val imageRef = storageRef.child("images/"+System.currentTimeMillis()).putFile(file,metadata)
+            val imageRef = storageRef.child("images/$userId"+System.currentTimeMillis()).putFile(file)
             imageRef.addOnSuccessListener {
                 Log.d(TAG, "Image successful upload on firebase:")
             }.addOnCanceledListener {

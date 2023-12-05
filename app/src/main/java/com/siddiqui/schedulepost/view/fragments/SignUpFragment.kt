@@ -17,11 +17,14 @@ import com.google.firebase.database.database
 import com.siddiqui.schedulepost.R
 import com.siddiqui.schedulepost.databinding.FragmentSignUpBinding
 import com.siddiqui.schedulepost.model.UserRegistration
+import com.siddiqui.schedulepost.tool.UserManager
+import com.siddiqui.schedulepost.tool.ValidEmail
 
 class SignUpFragment : Fragment() {
     private lateinit var binding: FragmentSignUpBinding
     private lateinit var database: DatabaseReference
     private lateinit var fragmentContext: Context
+    val userManager = UserManager()
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
@@ -45,12 +48,8 @@ class SignUpFragment : Fragment() {
                     .isNotEmpty() && binding.editTextPassword.text.toString().isNotEmpty()
                 && binding.editTextEmailOrMobile.text.toString().isNotEmpty()
             ) {
-                if (isValidEmail(binding.editTextEmailOrMobile.text.toString())) {
-                    /*val userData = UserRegistration(binding.editTextName.text.toString(),
-                        binding.editTextEmailOrMobile.text.toString(), binding.editTextPassword.text.toString())*/
-                    //userRegistration(userData)
+                if (ValidEmail().isValidEmail(binding.editTextEmailOrMobile.text.toString())) {
                     duplicateValue(binding.editTextEmailOrMobile.text.toString())
-
 
                 } else {
                     Toast.makeText(context, "Please correct email..", Toast.LENGTH_SHORT).show()
@@ -68,16 +67,12 @@ class SignUpFragment : Fragment() {
         transaction.replace(R.id.fragment_ContainerView, SignFragment()).commit()
     }
 
-    private fun isValidEmail(email: String): Boolean {
-        val regex = Regex("^(([\\w-.]+)@([\\w-]+\\.)+([a-z]{2,}))")
-        return regex.matches(email)
 
-    }
 
-    private fun userRegistration(userRegistration: UserRegistration) {
+   /* private fun userRegistration(userRegistration: UserRegistration) {
         database.child("users").child(database.child("users").push().key ?: "")
             .setValue(userRegistration)
-    }
+    }*/
 
     private fun duplicateValue(email: String) {
         val query = database.child("users").orderByChild("emailOrMobile").equalTo(email)
@@ -94,7 +89,7 @@ class SignUpFragment : Fragment() {
                         binding.editTextName.text.toString(),
                         email, binding.editTextPassword.text.toString()
                     )
-                    userRegistration(userData)
+                    userManager.createUser(userData)
                     navigateToLoginFragment()
                 }
             }
