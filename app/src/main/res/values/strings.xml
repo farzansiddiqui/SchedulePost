@@ -21,6 +21,7 @@
     <string name="sign_in">Sign In</string>
     <string name="facebook_post_schedule">Facebook Post Schedule</string>
     <string name="userLogin">User Login the Application</string>
+    <string name="email_store">Email Store on Shared Preference</string>
     <string name="image_form">Image View in the dialog form.</string>
     <string name="enter_name">enter name</string>
 </resources>

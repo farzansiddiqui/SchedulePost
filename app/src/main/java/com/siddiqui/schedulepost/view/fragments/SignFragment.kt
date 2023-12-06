@@ -84,6 +84,7 @@ class SignFragment : Fragment() {
                             ?: return
                     with(sharedPref.edit()) {
                         putBoolean(getString(R.string.userLogin), true)
+                        putString(getString(R.string.email_store),email)
                         apply()
                     }
                     startActivity(Intent(context, ListPostActivity::class.java))

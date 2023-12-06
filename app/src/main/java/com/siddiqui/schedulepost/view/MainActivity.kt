@@ -1,6 +1,7 @@
 package com.siddiqui.schedulepost.view
 
 import android.content.Context
+import android.content.SharedPreferences
 import android.net.Uri
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
@@ -16,6 +17,11 @@ import androidx.core.view.updateLayoutParams
 import com.facebook.FacebookSdk
 import com.facebook.appevents.AppEventsLogger
 import com.google.android.material.elevation.SurfaceColors
+import com.google.firebase.Firebase
+import com.google.firebase.database.DataSnapshot
+import com.google.firebase.database.DatabaseError
+import com.google.firebase.database.ValueEventListener
+import com.google.firebase.database.database
 import com.google.firebase.storage.FirebaseStorage
 import com.google.firebase.storage.StorageMetadata
 import com.siddiqui.schedulepost.tool.PhotoPicker
@@ -24,9 +30,13 @@ import com.siddiqui.schedulepost.adapter.GridViewAdapter
 import com.siddiqui.schedulepost.databinding.ActivityMainBinding
 import com.siddiqui.schedulepost.retrofit.RetrofitInstance
 import com.siddiqui.schedulepost.tool.ImageCompressor
+import com.siddiqui.schedulepost.tool.UserManager
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlin.coroutines.resume
+import kotlin.coroutines.resumeWithException
+import kotlin.coroutines.suspendCoroutine
 
 class MainActivity : AppCompatActivity() {
     private lateinit var binding: ActivityMainBinding
@@ -37,6 +47,8 @@ class MainActivity : AppCompatActivity() {
     private val storageRef = storage.reference
 
     private var imageUriList = mutableListOf<Uri?>()
+    private lateinit var userManager: UserManager
+    private lateinit var sharePref: SharedPreferences
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -44,9 +56,10 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
+        userManager = UserManager(supportFragmentManager)
 
+        sharePref = getSharedPreferences(packageName, Context.MODE_PRIVATE) ?: return
         window.navigationBarColor = SurfaceColors.getColorForElevation(this, 0f)
-
 
         ViewCompat.setOnApplyWindowInsetsListener(binding.root) { view, windowInsets ->
             val insets = windowInsets.getInsets(WindowInsetsCompat.Type.systemBars())
@@ -81,14 +94,15 @@ class MainActivity : AppCompatActivity() {
         }
 
         binding.gridView.setOnItemClickListener { _, _, position, _ ->
-                binding.enterEditTextCaptions.clearFocus()
+            binding.enterEditTextCaptions.clearFocus()
             if (imageUris[position] == null) {
                 photoPicker.pickMedia()
-            }else {
-                imageUris[position]?.let { openImageView( it) }
+            } else {
+                imageUris[position]?.let { openImageView(it) }
             }
 
         }
+
         //postData()
 
     }
@@ -123,27 +137,37 @@ class MainActivity : AppCompatActivity() {
         var nextDefaultItemPosition = 0
     }
 
-    private  fun uploadImage(imageUri: MutableList<Uri?>) {
-        val compressQuality = 80
-        val userId = "farzan";
+    private fun uploadImage(imageUri: MutableList<Uri?>) {
 
-        val compressor = ImageCompressor()
-        for (imageList in imageUri) {
-            val compressFile = compressor.compressImage(contentResolver,imageList!!,compressQuality)
-            val file = Uri.fromFile(compressFile)
-            val imageRef = storageRef.child("images/$userId"+System.currentTimeMillis()).putFile(file)
-            imageRef.addOnSuccessListener {
-                Log.d(TAG, "Image successful upload on firebase:")
-            }.addOnCanceledListener {
-                Log.d(TAG, "Image failed to upload try again!!.")
+        val userEmail = sharePref.getString(getString(R.string.email_store), "")
+
+        CoroutineScope(Dispatchers.Main).launch {
+            val email = userManager.getUserEmail(userEmail!!)
+            val compressQuality = 80
+            val compressor = ImageCompressor()
+            val folderReference = storageRef.child(email)
+            for (imageList in imageUri) {
+                val compressFile =
+                    compressor.compressImage(contentResolver, imageList!!, compressQuality)
+                val imagePath = "images/${System.currentTimeMillis()}"
+                val file = Uri.fromFile(compressFile)
+                val imageRef = folderReference.child(imagePath).putFile(file)
+
+                imageRef.addOnSuccessListener {
+                    Log.d(TAG, "Image successful upload on firebase:")
+                }.addOnCanceledListener {
+                    Log.d(TAG, "Image failed to upload try again!!.")
+                }
+
             }
 
         }
+
     }
 
     override fun onStop() {
         super.onStop()
-        nextDefaultItemPosition = 0;
+        nextDefaultItemPosition = 0
     }
 
     private fun postData() {
@@ -175,11 +199,11 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    private fun openImageView(uri: Uri){
-        val alertDialog = AlertDialog.Builder(this,R.style.TransparentAlertDialog)
+    private fun openImageView(uri: Uri) {
+        val alertDialog = AlertDialog.Builder(this, R.style.TransparentAlertDialog)
         val layoutInflater = layoutInflater
-        val view = layoutInflater.inflate(R.layout.image_dialog,null)
-        val imageView:ImageView = view.findViewById(R.id.imageView_dialog)
+        val view = layoutInflater.inflate(R.layout.image_dialog, null)
+        val imageView: ImageView = view.findViewById(R.id.imageView_dialog)
         imageView.setImageURI(uri)
         alertDialog.setView(view)
         alertDialog.show()
