@@ -20,6 +20,7 @@ import com.google.android.material.elevation.SurfaceColors
 import com.google.firebase.Firebase
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
+import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.database.ValueEventListener
 import com.google.firebase.database.database
 import com.google.firebase.storage.FirebaseStorage
@@ -143,6 +144,7 @@ class MainActivity : AppCompatActivity() {
 
         CoroutineScope(Dispatchers.Main).launch {
             val email = userManager.getUserEmail(userEmail!!)
+            sendCaption(email,binding.enterEditTextCaptions.text.toString())
             val compressQuality = 80
             val compressor = ImageCompressor()
             val folderReference = storageRef.child(email)
@@ -152,7 +154,6 @@ class MainActivity : AppCompatActivity() {
                 val imagePath = "images/${System.currentTimeMillis()}"
                 val file = Uri.fromFile(compressFile)
                 val imageRef = folderReference.child(imagePath).putFile(file)
-
                 imageRef.addOnSuccessListener {
                     Log.d(TAG, "Image successful upload on firebase:")
                 }.addOnCanceledListener {
@@ -207,8 +208,14 @@ class MainActivity : AppCompatActivity() {
         imageView.setImageURI(uri)
         alertDialog.setView(view)
         alertDialog.show()
-
     }
 
+    private fun sendCaption(email:String,captions: String) {
+        val database = FirebaseDatabase.getInstance()
+        val usersRef = database.getReference("users")
+
+        usersRef.child(email).push().setValue(captions)
+
+    }
 
 }
