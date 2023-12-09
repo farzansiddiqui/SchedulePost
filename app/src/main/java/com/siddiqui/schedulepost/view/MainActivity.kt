@@ -17,14 +17,11 @@ import androidx.core.view.updateLayoutParams
 import com.facebook.FacebookSdk
 import com.facebook.appevents.AppEventsLogger
 import com.google.android.material.elevation.SurfaceColors
-import com.google.firebase.Firebase
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.database.ValueEventListener
-import com.google.firebase.database.database
 import com.google.firebase.storage.FirebaseStorage
-import com.google.firebase.storage.StorageMetadata
 import com.siddiqui.schedulepost.tool.PhotoPicker
 import com.siddiqui.schedulepost.R
 import com.siddiqui.schedulepost.adapter.GridViewAdapter
@@ -35,9 +32,6 @@ import com.siddiqui.schedulepost.tool.UserManager
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import kotlin.coroutines.resume
-import kotlin.coroutines.resumeWithException
-import kotlin.coroutines.suspendCoroutine
 
 class MainActivity : AppCompatActivity() {
     private lateinit var binding: ActivityMainBinding
@@ -144,7 +138,7 @@ class MainActivity : AppCompatActivity() {
 
         CoroutineScope(Dispatchers.Main).launch {
             val email = userManager.getUserEmail(userEmail!!)
-            sendCaption(email,binding.enterEditTextCaptions.text.toString())
+            sendCaption(email, binding.enterEditTextCaptions.text.toString())
             val compressQuality = 80
             val compressor = ImageCompressor()
             val folderReference = storageRef.child(email)
@@ -210,11 +204,29 @@ class MainActivity : AppCompatActivity() {
         alertDialog.show()
     }
 
-    private fun sendCaption(email:String,captions: String) {
+    private fun sendCaption(email: String, captions: String) {
         val database = FirebaseDatabase.getInstance()
         val usersRef = database.getReference("users")
+        usersRef.addListenerForSingleValueEvent(object : ValueEventListener {
+            override fun onDataChange(snapshot: DataSnapshot) {
+                for (userSnapshot in snapshot.children) {
+                    val userId = userSnapshot.key
+                    val userEmail = userSnapshot.child("emailOrMobile").getValue(String::class.java)
+                    if (userId != null && userEmail != null) {
+                        if (userEmail == email) {
+                            usersRef.child(userId).push().child("facebook captions")
+                                .setValue(captions)
+                        }
+                    }
+                }
 
-        usersRef.child(email).push().setValue(captions)
+            }
+
+            override fun onCancelled(error: DatabaseError) {
+                Toast.makeText(this@MainActivity, error.message, Toast.LENGTH_SHORT).show()
+            }
+        })
+
 
     }
 

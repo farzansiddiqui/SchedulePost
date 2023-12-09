@@ -21,14 +21,16 @@ class UserManager(val fragmentManager: FragmentManager) {
 
     // Function to create a new user and return the unique identifier
     fun createUser(userRegistration: UserRegistration): String {
-        val database = FirebaseDatabase.getInstance()
-        val usersRef = database.getReference("users")
+        val database = Firebase.database.reference
+       // val usersRef = database.getReference("users")
+        val userKey = database.child("users").push().key ?: ""
+        database.child("users").child(userKey).setValue(userRegistration)
 
-        val userKey = usersRef.push().key
+        //val userKey = usersRef.push().key
 
+      //  usersRef.child(userKey ?: "").setValue(userRegistration)
 
-        usersRef.child(userKey ?: "").setValue(userRegistration)
-        return userKey ?: ""
+        return userKey
     }
 
     fun duplicateValue(context:Context,name:String,email:String,password:String) {
@@ -66,19 +68,21 @@ class UserManager(val fragmentManager: FragmentManager) {
         val database = Firebase.database.reference
         val query = database.child("users").orderByChild("emailOrMobile").equalTo(email)
         return suspendCoroutine { continuation ->
+
             query.addListenerForSingleValueEvent(object :ValueEventListener {
                 override fun onDataChange(snapshot: DataSnapshot) {
                     if (snapshot.exists()){
                         // Assuming there is only one user with the specified email.
                         val user = snapshot.children.first()
+
                         val userEmail = user.child("emailOrMobile").getValue(String::class.java)
 
                         continuation.resume(userEmail ?: "")
-                    }else {
+
+                    } else {
                         continuation.resume("")
                     }
                 }
-
                 override fun onCancelled(error: DatabaseError) {
                     continuation.resumeWithException(error.toException())
                 }
@@ -86,6 +90,5 @@ class UserManager(val fragmentManager: FragmentManager) {
 
         }
     }
-
 
 }

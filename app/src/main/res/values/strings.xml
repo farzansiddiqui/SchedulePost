@@ -15,6 +15,8 @@
     <string name="add_post">Add Post</string>
     <string name="facebook_app_id">334978012382048</string>
     <string name="facebook_client_token">b40f2226ede3304971fd6977613c862c</string>
+    <string name="fb_login_protocol_scheme">fb334978012382048</string>
+
     <string name="enter_email_or_mobile_number">enter email or mobile number</string>
     <string name="enter_password">enter password</string>
     <string name="sign_up">Sign Up</string>
@@ -24,4 +26,6 @@
     <string name="email_store">Email Store on Shared Preference</string>
     <string name="image_form">Image View in the dialog form.</string>
     <string name="enter_name">enter name</string>
+    <string name="facebook_login">Continue with Facebook</string>
+    <string name="f_b_description">Unlock a seamless experience with Facebook login! Enjoy the convenience of scheduling posts and effortlessly sharing content</string>
 </resources>
