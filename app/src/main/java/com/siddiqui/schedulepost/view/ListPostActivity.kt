@@ -16,6 +16,7 @@ import com.facebook.CallbackManager
 import com.facebook.FacebookCallback
 import com.facebook.FacebookException
 import com.facebook.FacebookSdk
+import com.facebook.appevents.AppEventsLogger
 import com.facebook.login.LoginManager
 import com.facebook.login.LoginResult
 import com.google.android.material.elevation.SurfaceColors
@@ -29,20 +30,18 @@ import com.siddiqui.schedulepost.R
 import com.siddiqui.schedulepost.adapter.ViewPagerAdapter
 import com.siddiqui.schedulepost.databinding.ActivityListPostBinding
 import com.siddiqui.schedulepost.view.MainActivity.Companion.TAG
-import java.util.Arrays
 
 class ListPostActivity : AppCompatActivity() {
     private lateinit var binding: ActivityListPostBinding
     private lateinit var callbackManager: CallbackManager
     private lateinit var auth: FirebaseAuth
-    private val EMAIL = "email"
     override fun onCreate(savedInstanceState: Bundle?) {
         enableEdgeToEdge()
         super.onCreate(savedInstanceState)
 
         binding = ActivityListPostBinding.inflate(layoutInflater)
         setContentView(binding.root)
-        window.navigationBarColor = SurfaceColors.getColorForElevation(this,0f)
+        window.navigationBarColor = SurfaceColors.getColorForElevation(this, 0f)
 
 
         ViewCompat.setOnApplyWindowInsetsListener(binding.root) { view, windowInsets ->
@@ -60,6 +59,7 @@ class ListPostActivity : AppCompatActivity() {
         auth = Firebase.auth
 
         FacebookSdk.sdkInitialize(applicationContext)
+        AppEventsLogger.activateApp(applicationContext)
 
 
         // using this adapter for add the tab in that layout
@@ -85,33 +85,36 @@ class ListPostActivity : AppCompatActivity() {
 
 
         callbackManager = CallbackManager.Factory.create()
-        binding.facebook.facebookLoginBtn.setReadPermissions(listOf(EMAIL))
+        binding.facebook.facebookLoginBtn.setPermissions(listOf("email", "public_profile"))
 
-        binding.facebook.facebookLoginBtn.registerCallback(callbackManager, object : FacebookCallback<LoginResult>{
-            override fun onSuccess(loginResult: LoginResult?) {
-                Log.d(TAG, "facebook:onSuccess: ${loginResult ?: ""}")
-                if (loginResult != null){
-                    handleFacebookAccessToken(loginResult.accessToken)
+        binding.facebook.facebookLoginBtn.registerCallback(
+            callbackManager,
+            object : FacebookCallback<LoginResult> {
+                override fun onSuccess(loginResult: LoginResult?) {
+                    Log.d(TAG, "facebook:onSuccess: ${loginResult ?: "failed to login"}")
+                    handleFacebookAccessToken(loginResult!!.accessToken)
                 }
 
-            }
+                override fun onCancel() {
+                    Log.d(TAG, "facebook : onCancel: ")
+                    AccessToken.setCurrentAccessToken(null)
+                    LoginManager.getInstance().logOut()
 
-            override fun onCancel() {
-                Log.d(TAG, "facebook : onCancel: ")
-                AccessToken.setCurrentAccessToken(null)
-                LoginManager.getInstance().logOut()
+                }
 
-            }
-
-            override fun onError(error: FacebookException?) {
-                Log.d(TAG, "facebook : onError:",error)
-            }
-        })
+                override fun onError(error: FacebookException?) {
+                    Log.d(TAG, "facebook : onError:", error)
+                }
+            })
 
 
     }
 
     private fun updateUI(user: FirebaseUser?) {
+        val name = user?.displayName
+        binding.facebook.displayName.text = name
+        Log.d(TAG, "updateUI: $name")
+        //Toast.makeText(this, name, Toast.LENGTH_SHORT).show()
 
     }
 
@@ -139,11 +142,22 @@ class ListPostActivity : AppCompatActivity() {
             }
     }
 
+    override fun onStart() {
+        super.onStart()
+        val currentUser = auth.currentUser
+        if (currentUser == null){
+            Toast.makeText(this, "User not login with fb!", Toast.LENGTH_SHORT).show()
+        }else {
+            updateUI(currentUser)
+        }
+
+    }
+
     @Deprecated("Deprecated in Java")
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-        super.onActivityResult(requestCode, resultCode, data)
         // Pass the activity result back to the Facebook SDK
         callbackManager.onActivityResult(requestCode, resultCode, data)
+        super.onActivityResult(requestCode, resultCode, data)
 
     }
 
