@@ -3,7 +3,6 @@ package com.siddiqui.schedulepost.view
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import androidx.fragment.app.Fragment
-import com.google.android.material.button.MaterialButton
 import com.siddiqui.schedulepost.R
 import com.siddiqui.schedulepost.databinding.ActivityUserLoginBinding
 import com.siddiqui.schedulepost.view.fragments.SignFragment

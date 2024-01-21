@@ -32,9 +32,13 @@ import com.siddiqui.schedulepost.databinding.ActivityListPostBinding
 import com.siddiqui.schedulepost.view.MainActivity.Companion.TAG
 
 class ListPostActivity : AppCompatActivity() {
+
     private lateinit var binding: ActivityListPostBinding
+
     private lateinit var callbackManager: CallbackManager
+
     private lateinit var auth: FirebaseAuth
+
     override fun onCreate(savedInstanceState: Bundle?) {
         enableEdgeToEdge()
         super.onCreate(savedInstanceState)
@@ -47,7 +51,7 @@ class ListPostActivity : AppCompatActivity() {
         ViewCompat.setOnApplyWindowInsetsListener(binding.root) { view, windowInsets ->
             val insets = windowInsets.getInsets(WindowInsetsCompat.Type.systemBars())
             view.updateLayoutParams<MarginLayoutParams> {
-                // Push all content below the top system status bar
+                // Push all content below the top system status bar..
                 topMargin = insets.top
                 bottomMargin = insets.bottom
 
@@ -78,14 +82,16 @@ class ListPostActivity : AppCompatActivity() {
                 1 -> {
                     tab.text = getString(R.string.scheduled_post)
                     tab.icon =
+
                         AppCompatResources.getDrawable(this, R.drawable.baseline_calendar_month_24)
+
                 }
             }
         }.attach()
 
 
         callbackManager = CallbackManager.Factory.create()
-        binding.facebook.facebookLoginBtn.setPermissions(listOf("email", "public_profile"))
+        binding.facebook.facebookLoginBtn.setReadPermissions(listOf("email", "public_profile"))
 
         binding.facebook.facebookLoginBtn.registerCallback(
             callbackManager,
@@ -111,26 +117,35 @@ class ListPostActivity : AppCompatActivity() {
     }
 
     private fun updateUI(user: FirebaseUser?) {
-        val name = user?.displayName
-        binding.facebook.displayName.text = name
-        Log.d(TAG, "updateUI: $name")
+        if (user != null){
+            val name = user?.displayName
+            binding.facebook.displayName.text = name
+            Log.d(TAG, "updateUI: $name")
+        }else {
+            Toast.makeText(this, "user data $user", Toast.LENGTH_SHORT).show()
+        }
+
         //Toast.makeText(this, name, Toast.LENGTH_SHORT).show()
+
+
 
     }
 
     private fun handleFacebookAccessToken(token: AccessToken) {
+
         Log.d(TAG, "handleFacebookAccessToken:$token")
 
         val credential = FacebookAuthProvider.getCredential(token.token)
+
         auth.signInWithCredential(credential)
             .addOnCompleteListener(this) { task ->
                 if (task.isSuccessful) {
-                    // Sign in success, update UI with the signed-in user's information
+                    // Sign in success, update UI with the signed-in user's information..
                     Log.d(TAG, "signInWithCredential:success")
                     val user = auth.currentUser
                     updateUI(user)
                 } else {
-                    // If sign in fails, display a message to the user.
+                    // If sign in fails, display a message to the user..
                     Log.w(TAG, "signInWithCredential:failure", task.exception)
                     Toast.makeText(
                         baseContext,
@@ -144,20 +159,21 @@ class ListPostActivity : AppCompatActivity() {
 
     override fun onStart() {
         super.onStart()
+        Log.d(TAG, "onStart: ")
         val currentUser = auth.currentUser
         if (currentUser == null){
             Toast.makeText(this, "User not login with fb!", Toast.LENGTH_SHORT).show()
         }else {
             updateUI(currentUser)
         }
-
     }
 
     @Deprecated("Deprecated in Java")
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         // Pass the activity result back to the Facebook SDK
-        callbackManager.onActivityResult(requestCode, resultCode, data)
         super.onActivityResult(requestCode, resultCode, data)
+
+        callbackManager.onActivityResult(requestCode, resultCode, data)
 
     }
 

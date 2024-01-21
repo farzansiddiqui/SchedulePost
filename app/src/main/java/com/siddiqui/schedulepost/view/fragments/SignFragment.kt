@@ -71,7 +71,7 @@ class SignFragment : Fragment() {
                 var emailAndPasswordExist = false
                 for (dataSnapShotChild in snapshot.children) {
                     val userRegistration = dataSnapShotChild.getValue(UserRegistration::class.java)
-                    // Check if the password matches for any user with the specified email
+                    // Check if the password matches for any user with the specified email..
                     if (userRegistration?.password.equals(pass)) {
                         emailAndPasswordExist = true
                         break
